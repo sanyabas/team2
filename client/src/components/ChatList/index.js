@@ -60,11 +60,11 @@ export default class ChatList extends Component {
                         {this.props.searchResult &&
                         this.props.searchResult.map(result =>
                             <Contact
-                                key={result.id}
+                                key={result._id}
                                 login={result.login}
                                 avatar={result.avatar}
                                 withCheckbox={false}
-                                onClick={() => this.props.addContact(result.id)}/>
+                                onClick={() => this.props.addContact(result._id)}/>
                         )}
                     </SearchResults>
                 </div>
