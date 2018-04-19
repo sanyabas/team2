@@ -6,7 +6,7 @@
     "test": "npm run lint && mocha ./tests/*.js",
     "start": "node index.js",
     "deploy:clean": "now rm kilogram-team2 -s -y --token $NOW_TOKEN",
-    "deploy:server": "now -E -e GITHUB_CLIENT_ID -e GITHUB_CLIENT_SECRET --token $NOW_TOKEN --docker --public",
+    "deploy:server": "now -E -e GITHUB_CLIENT_ID -e GITHUB_CLIENT_SECRET -e DB_URL --token $NOW_TOKEN --docker --public",
     "deploy:alias": "now alias --token=$NOW_TOKEN",
     "deploy": "npm-run-all deploy:clean deploy:server deploy:alias"
   },
