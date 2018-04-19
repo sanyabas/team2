@@ -20,9 +20,20 @@ const app = express();
 const httpServer = createServer(app);
 const sessionStore = new session.MemoryStore();
 
-mongoose.connect(process.env.DB_URL, { connectTimeoutMS: 4000 }).then(
-    () => console.info('Connected to database'),
-    (e) => console.error(e));
+let timeout = 3000;
+
+function connect() {
+    mongoose.connect(process.env.DB_URL, { connectTimeoutMS: timeout }).then(
+        () => console.info('Connected to database'),
+        (e) => {
+            console.error(e);
+            timeout += 2000;
+            console.info(`Attempt to connect with ${timeout} ms`);
+            connect();
+        });
+}
+
+connect();
 
 const corsOptions = {
     origin: 'http://localhost:8080',
