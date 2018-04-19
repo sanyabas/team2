@@ -1,7 +1,6 @@
 'use strict';
 
 const PassportMemStoreSessionGetter = require('./classes/PassportMemStoreSessionGetter');
-// eslint-disable-next-line no-unused-vars
 const olesya = require('./tools/olesya');
 const WebSocketServer = require('./classes/WebSocketServer');
 const SendQueue = require('./classes/SendQueue');
@@ -14,8 +13,7 @@ let LOGINS_CACHE = [];
 const {
     ChatModel,
     UserModel,
-    UserIdLoginModel,
-    messageModelFactory
+    MessageModel
 } = require('./models');
 const sendQueue = new SendQueue();
 const executeQueues = {};
@@ -59,9 +57,10 @@ module.exports = async function (app, sessionStore) {
                 const result = await addContact(uid, userId);
 
                 result.users.forEach(user => {
-                    wsServer.emitByUID(user.id, 'NewChat', result);
+                    wsServer.emitByUID(user._id, 'NewChat', result);
                 });
             } catch (error) {
+                console.error(error);
                 socket.emitByUID(uid, 'AddContactResult', {
                     success: false,
                     error: error.message || error.body
@@ -81,7 +80,7 @@ module.exports = async function (app, sessionStore) {
         socket.on('SendMessage', pushAction.bind(null, uid, async ({ chatId, text }) => {
             try {
                 const message = await sendMessage(uid, chatId, text);
-                const chat = await ChatModel.getById(chatId);
+                const chat = await ChatModel.findById(chatId).exec();
 
                 wsServer.emitByUID(uid, 'SendMessageResult', {
                     success: true,
@@ -99,12 +98,8 @@ module.exports = async function (app, sessionStore) {
         }));
         socket.on('AskOlesya', pushAction.bind(null, uid, async (text) => {
             try {
-                const OlesyMessageModel = messageModelFactory('olesya');
                 const answer = await olesya.ask(text);
-
-                const olesyaMessage = new OlesyMessageModel({
-                    body: answer
-                });
+                const olesyaMessage = new MessageModel({ chat: 'olesya', body: answer });
 
                 socket.emit('AskOlesyaResult', {
                     success: true,
@@ -146,22 +141,21 @@ async function execute(socket, uid, fn, data) {
 }
 
 async function sendMessage(uid, chatId, text) {
-    const chat = await ChatModel.getById(chatId);
+    const chat = await ChatModel.findById(chatId).exec();
 
     if (chat.users.indexOf(uid) === -1) {
         throw new Error('Not your chat!');
     }
 
-    const MessageModel = messageModelFactory(chatId);
     const hrefs = getHrefArray(text);
 
     const message = new MessageModel({
+        chatId: chatId,
         from: uid,
         body: markdownIt(text)
     });
 
     sendQueue.push(chatId, message);
-    message.chatId = chatId;
 
     if (hrefs.length) {
         try {
@@ -176,29 +170,28 @@ async function sendMessage(uid, chatId, text) {
 }
 
 async function DeleteProfile(uid) {
-    return await UserModel.removeById(uid);
+    return await UserModel.findByIdAndRemove(uid).exec();
 }
 
 async function GetMessages(uid, { chatId, offset, limit }) {
-    const chat = await ChatModel.getById(chatId);
+    const chat = await ChatModel.findById(chatId).exec();
 
     if (chat.users.indexOf(uid) === -1) {
         throw new Error('Not your chat!');
     }
 
-    const MessageModel = messageModelFactory(chatId);
-
     return {
         chatId,
-        messages: await MessageModel.getList({
-            offset: offset || 0,
-            limit: limit || 100
-        })
+        messages: await MessageModel
+            .find({ chatId: chatId })
+            .skip(offset || 0)
+            .limit(limit || 0)
+            .exec()
     };
 }
 
 async function GetProfile(uid, userId) {
-    const user = await UserModel.getById(userId || uid);
+    const user = await UserModel.findById(userId || uid).exec();
 
     return getProfileFromUser(user);
 }
@@ -210,7 +203,7 @@ async function SearchByLogin(uid, login) {
         throw new Error('Empty request!');
     }
 
-    const me = await UserModel.getById(uid);
+    const me = await UserModel.findById(uid).exec();
     const foundUsers = await findLoginInCache(login, me);
 
     if (foundUsers.length !== 0) {
@@ -225,37 +218,43 @@ async function addContact(uid, userId) {
         throw new Error('You can\'t add yourself!');
     }
 
-    const me = await UserModel.getById(uid);
+    const me = await UserModel.findById(uid).exec();
     if (me.contacts.indexOf(userId) !== -1) {
         throw new Error('You have this contact!');
     }
-    const he = await UserModel.getById(userId);
+    const he = await UserModel.findById(userId);
 
-    me.addContact(he);
+    await me.addContact(userId);
+    await he.addContact(uid);
 
     const chat = new ChatModel({
         dialog: true
     });
     await chat.save();
 
-    await chat.addUser(he);
-    await chat.addUser(me);
+    await chat.addUser(uid);
+    await chat.addUser(userId);
+
+    await me.addChat(chat._id);
+    await he.addChat(chat._id);
 
     return getChatForEmit(chat);
 }
 
 async function GetChatList(uid) {
-    const user = await UserModel.getById(uid);
+    const user = await UserModel
+        .findById(uid)
+        .populate('chats')
+        .exec();
 
     const result = [];
-    for (const chatId of user.chats) {
+    for (const chat of user.chats) {
         try {
-            const chat = await ChatModel.getById(chatId);
             const emitChat = await getChatForEmit(chat);
 
             result.push(emitChat);
         } catch (error) {
-            console.error(`Can't find chat ${chatId}`);
+            console.error(`Can't find chat ${chat._id}`);
         }
     }
 
@@ -263,39 +262,39 @@ async function GetChatList(uid) {
 }
 
 async function getChatForEmit(chat) {
-    const users = await (await ChatModel.getById(chat.id)).getByLink('users');
+    const newChat = await ChatModel
+        .findById(chat._id)
+        .populate('users')
+        .exec();
 
     return {
-        id: chat.id,
+        _id: chat._id,
         name: chat.name,
         dialog: chat.dialog,
-        users: users.map(getProfileFromUser)
+        users: newChat.users.map(getProfileFromUser)
     };
 }
 
 function getProfileFromUser(user) {
     return {
-        id: user.id,
+        _id: user._id,
         login: user.login,
         avatar: user.avatar
     };
 }
 
 async function updateLoginCache() {
-    const iterator = UserIdLoginModel.getIterator({
-        limit: 100
-    });
+    const iterator = UserModel.find({}).cursor();
 
     const newCache = [];
-    let next = await iterator.next();
-    while (next) {
+    let user = await iterator.next();
+    while (user) {
         try {
-            const user = await next.getByLink('userId');
             newCache.push(getProfileFromUser(user));
         } catch (error) {
             console.error(error.body);
         } finally {
-            next = await iterator.next();
+            user = await iterator.next();
         }
     }
 
@@ -307,8 +306,8 @@ async function findLoginInCache(str, me) {
 
     for (const profile of LOGINS_CACHE) {
         const match = profile.login.toLowerCase().indexOf(str.toLowerCase()) !== -1;
-        const notHave = me.contacts.indexOf(profile.id) === -1;
-        const notMe = profile.id !== me.id;
+        const notHave = me.contacts.indexOf(profile._id) === -1;
+        const notMe = profile._id !== me._id;
 
         if (match && notHave && notMe) {
             foundUsers.push(profile);
@@ -321,22 +320,21 @@ async function findLoginInCache(str, me) {
 async function findLoginInDB(str, me) {
     const foundUsers = [];
 
-    const allUsersIterator = UserIdLoginModel.getIterator();
-    let userIdAndLogin = await allUsersIterator.next();
-    while (userIdAndLogin) {
-        const match = userIdAndLogin.login.toLowerCase().indexOf(str.toLowerCase()) !== -1;
-        const notHave = me.contacts.indexOf(userIdAndLogin.userId) === -1;
-        const notMe = userIdAndLogin.userId !== me.id;
+    const usersIterator = UserModel.find({}).cursor();
+    let user = await usersIterator.next();
+    while (user) {
+        const match = user.login.toLowerCase().indexOf(str.toLowerCase()) !== -1;
+        const notHave = me.contacts.indexOf(user._id) === -1;
+        const notMe = user._id !== me._id;
 
         if (match && notHave && notMe) {
             try {
-                const user = await userIdAndLogin.getByLink('userId');
                 foundUsers.push(user);
             } catch (error) {
                 console.error(error.message);
             }
         }
-        userIdAndLogin = await allUsersIterator.next();
+        user = await usersIterator.next();
     }
 
     return foundUsers;

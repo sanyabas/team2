@@ -47,7 +47,7 @@ worker.subscribe('GetProfile', (error, profile) => {
 worker.subscribe('GetChatList', (error, chats) => {
     chats.forEach(chat => {
         worker.getMessages({
-            chatId: chat.id,
+            chatId: chat._id,
             offset: 0,
             limit: 50
         });
@@ -62,8 +62,8 @@ function initChat(chat) {
         return;
     }
     console.info('chat: ', chat);
-    const user = chat.users.find(entry => entry.id !== store.profile.id);
-    console.info(chat, store.profile.id);
+    const user = chat.users.find(entry => entry._id !== store.profile._id);
+    console.info(chat, store.profile._id);
     chat.avatar = user.avatar;
     chat.name = user.login;
 
@@ -91,7 +91,7 @@ worker.subscribe('GetMessages', (error, data) => {
 /* eslint-disable handle-callback-err */
 worker.subscribe('AddContact', (err, chat) => {
     store.chats = store.chats.concat([initChat(chat)]);
-    store.chatHistories = store.chatHistories.concat([{ chatId: chat.id, messages: [] }]);
+    store.chatHistories = store.chatHistories.concat([{ chatId: chat._id, messages: [] }]);
 });
 
 worker.subscribe('AskOlesya', (err, message) => {
@@ -110,7 +110,7 @@ worker.subscribe('AskOlesya', (err, message) => {
 worker.subscribe('NewChat', (err, chat) => {
     store.loadingState = States.LOADED;
     store.chats = store.chats.concat([initChat(chat)]);
-    store.chatHistories = store.chatHistories.concat([{ chatId: chat.id, messages: [] }]);
+    store.chatHistories = store.chatHistories.concat([{ chatId: chat._id, messages: [] }]);
 });
 
 ReactDOM.render(<App store={store} worker={worker}/>, document.getElementById('root'));

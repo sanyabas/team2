@@ -9,7 +9,7 @@ module.exports = function (passport) {
 
     passport.deserializeUser(async (id, done) => {
         try {
-            const user = await UserModel.getById(id);
+            const user = await UserModel.findById(id).exec();
 
             done(null, user);
         } catch (error) {

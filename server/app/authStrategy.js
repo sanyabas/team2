@@ -2,12 +2,8 @@
 
 const config = require('config');
 const passportGithub = require('passport-github');
-const Github = require('./models/Github');
 const User = require('./models/User');
-const UserIdLogin = require('./models/UserIdLogin');
 const GithubAvatar = require('./tools/githubAvatar');
-
-Github.makeLink('uid', User);
 
 const strategy = new passportGithub.Strategy(
     {
@@ -17,10 +13,11 @@ const strategy = new passportGithub.Strategy(
     },
     async (accessToken, refreshToken, profile, done) => {
         try {
-            const github = await Github.getById(profile.id);
-            const user = await User.getById(github.uid);
-
-            console.info(`User exist ${user.login}`);
+            const user = await User.findOne({ githubId: profile.id }).exec();
+            if (user === null) {
+                throw new Error('User doesnt exist, creating');
+            }
+            console.info(`User exist ${user}`);
             done(null, user);
         } catch (error) {
             console.info(error.message);
@@ -35,18 +32,6 @@ const strategy = new passportGithub.Strategy(
                 avatar: new GithubAvatar(profile.username, 200).toImgSrc()
             });
 
-            const github = new Github({
-                id: profile.id,
-                uid: user.id
-            });
-
-            const userIdLogin = new UserIdLogin({
-                login: profile.username,
-                userId: user.id
-            });
-
-            await userIdLogin.save();
-            await github.save();
             await user.save();
 
             done(null, user);

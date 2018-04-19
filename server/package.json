@@ -31,6 +31,7 @@
     "hruhru": "git+https://github.com/yuickhahirasawa/HruHru.git",
     "identicon.js": "^2.3.2",
     "memorystore": "^1.6.0",
+    "mongoose": "^5.0.15",
     "morgan": "^1.9.0",
     "node-fetch": "^2.1.2",
     "node-geocoder": "^3.22.0",

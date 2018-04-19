@@ -34,8 +34,8 @@ export default class Chat extends Component {
         let chatHistoryToRender;
         if (chatHistory) {
             chatHistoryToRender = chatHistory.messages.map(message => (
-                <UserMessage key={message.id} og={message.og}
-                    fromMe={message.from === this.props.profile.id} name={message.name}
+                <UserMessage key={message._id} og={message.og}
+                    fromMe={message.from === this.props.profile._id} name={message.name}
                     body={message.body} date={new Date(message.createdAt) || new Date()}/>
             ));
         }

@@ -1,13 +1,27 @@
 'use strict';
 
-const { makeModel } = require('hruhru');
-const userScheme = require('../schemes/userScheme');
+const mongoose = require('mongoose');
 
-const userBaseModel = makeModel(userScheme, 'users');
+const userSchema = new mongoose.Schema({
+    login: { type: String, index: true, unique: true },
+    name: String,
+    avatar: String,
+    githubId: String,
+    createdAt: { type: Date, default: Date.now() },
+    chats: [{ type: mongoose.Schema.ObjectId, ref: 'Chat' }],
+    contacts: [{ type: mongoose.Schema.ObjectId, ref: 'User' }]
+});
 
-userBaseModel.prototype.addContact = async function (user) {
-    await this.atomPush('contacts', user.id);
-    await this.atomPush('contacts', this.id);
+userSchema.methods.addContact = async function (otherId) {
+    this.contacts.push(otherId);
+
+    return this.save();
 };
 
-module.exports = userBaseModel;
+userSchema.methods.addChat = function (chatId) {
+    this.chats.push(chatId);
+
+    return this.save();
+};
+
+module.exports = mongoose.model('User', userSchema);

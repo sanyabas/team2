@@ -9,7 +9,7 @@ module.exports = app => {
         '/',
         (req, res) => {
             if (req.isAuthenticated()) {
-                res.render('app', { staticPath: config.get('staticPath') });
+                res.render('app', { staticPath: '' });
             } else {
                 res.redirect(`${config.get('host')}/login`);
             }

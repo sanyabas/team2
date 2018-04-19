@@ -23,7 +23,7 @@ export default class ChatInput extends React.Component {
     /* eslint-disable no-console */
     submitHandler(event) {
         const message = {
-            from: this.props.profile.id,
+            from: this.props.profile._id,
             body: this.state.chatInput,
             id: uuid(),
             createdAt: Date.now(),

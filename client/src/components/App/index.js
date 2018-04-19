@@ -69,19 +69,19 @@ export default class App extends Component {
 
     render() {
         const currentChat = this.state.currentChat === 'olesya' ? this.props.store.olesyaChat :
-            this.props.store.chats.find(chat => chat.id === this.state.currentChat);
+            this.props.store.chats.find(chat => chat._id === this.state.currentChat);
         const chats = this.props.store.chats.map(chat => {
-            const chatHistory = this.props.store.chatHistories[chat.id];
+            const chatHistory = this.props.store.chatHistories[chat._id];
             let lastMessage = '';
             if (chatHistory && chatHistory.length > 0) {
                 lastMessage = chatHistory[chatHistory.length - 1].body;
             }
 
             return (
-                <ChatItem key={chat.id} photoURL={chat.avatar} name={chat.name}
+                <ChatItem key={chat._id} photoURL={chat.avatar} name={chat.name}
                     lastMessage={lastMessage}
                     lastMessageDate={new Date()}
-                    onClick={this.changeChat.bind(this, chat.id)}/>
+                    onClick={this.changeChat.bind(this, chat._id)}/>
             );
         });
 
@@ -94,13 +94,13 @@ export default class App extends Component {
         );
 
         const chatHistory = this.props.store.chatHistories
-            .filter(history => history.chatId === this.state.currentChat.id)[0];
+            .filter(history => history.chatId === this.state.currentChat._id)[0];
 
         let chatHistoryToRender;
         if (chatHistory) {
             chatHistoryToRender = chatHistory.map(message => (
-                <UserMessage key={message.id}
-                    fromMe={message.from === this.props.store.profile.id} name={message.name}
+                <UserMessage key={message._id}
+                    fromMe={message.from === this.props.store.profile._id} name={message.name}
                     body={message.body} date={message.date || new Date()}/>
             ));
         }
@@ -148,7 +148,7 @@ export default class App extends Component {
                 }
                 {currentChat
                     ? <Chat name={currentChat.name}
-                        chatId={currentChat.id}
+                        chatId={currentChat._id}
                         chatHistories={this.props.store.chatHistories}
                         addMessage={this.props.store.addMessage.bind(this.props.store)}
                         sendMessage={this.props.worker.sendMessage.bind(this.props.worker)}
