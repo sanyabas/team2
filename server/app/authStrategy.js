@@ -17,7 +17,7 @@ const strategy = new passportGithub.Strategy(
             if (user === null) {
                 throw new Error('User doesnt exist, creating');
             }
-            console.info(`User exist ${user}`);
+            console.info(`User exist ${user.login}`);
             done(null, user);
         } catch (error) {
             console.info(error.message);

@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const vendorLibs = [
     'react',
@@ -15,7 +14,7 @@ const host = process.env.NODE_ENV === 'production'
 console.info(host);
 
 module.exports = {
-    mode: 'development',
+    mode: process.env.NODE_ENV,
     entry: {
         index: path.join(__dirname, '/src/index.js'),
         vendor: vendorLibs
@@ -91,9 +90,6 @@ module.exports = {
     },
 
     plugins: [
-        new HtmlWebpackPlugin({
-            template: 'index.html'
-        }),
         new webpack.DefinePlugin({
             'process.env.HOST': JSON.stringify(host)
         })
