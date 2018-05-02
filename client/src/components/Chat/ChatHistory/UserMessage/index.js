@@ -14,7 +14,7 @@ export default class UserMessage extends Component {
         isSent: PropTypes.bool,
         name: PropTypes.string,
         body: PropTypes.string.isRequired,
-        createdAt: PropTypes.string,
+        createdAt: PropTypes.number,
         og: PropTypes.object
     };
 

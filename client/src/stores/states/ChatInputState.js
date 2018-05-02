@@ -1,5 +1,6 @@
 /* eslint-disable no-invalid-this */
 import { observable, action } from 'mobx';
+import { emojiIndex } from 'emoji-mart';
 
 export default class ChatInputState {
 
@@ -9,6 +10,11 @@ export default class ChatInputState {
     }
 
     @observable chatInput = '';
+    @observable showEmojiList = false;
+
+    @action toggleEmojiList = () => {
+        this.showEmojiList = !this.showEmojiList;
+    };
 
     @action change = (inputText) => {
         this.chatInput = inputText;
@@ -24,4 +30,12 @@ export default class ChatInputState {
         });
         this.chatInput = '';
     };
+
+    findEmoji = id => emojiIndex.search(id)
+        .filter(x => x.id === id)
+        .map(x => x.native);
+
+    addEmojiIntoText(_, emojiValue) {
+        this.chatInput += `${this.findEmoji(emojiValue.name)}`;
+    }
 }
