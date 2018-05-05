@@ -4,8 +4,8 @@ import ss from 'socket.io-stream';
 
 const METHODS =
     ['GetMessages', 'GetProfile', 'SearchByLogin', 'AddContact', 'GetChatList',
-        'SendMessage', 'SendReaction', 'DeleteProfile', 'UploadImage', 'CreateChat',
-        'RevokeLink', 'GetContactList', 'SetAlarm', 'UploadAvatar'];
+        'SendMessage', 'SendReaction', 'DeleteProfile', 'UploadImage', 'UploadAvatar', 'CreateChat',
+        'RevokeLink', 'GetContactList', 'JoinChat', 'RenameChat', 'LeaveChat', 'SetAlarm'];
 
 
 let TOKEN;
@@ -34,6 +34,12 @@ function init() {
 
     socket.on('NewReaction', reaction => {
         postMessage({ action: 'NewReaction', result: reaction, type: Types.EMIT });
+    });
+    socket.on('NewChatName', chat => {
+        postMessage({ action: 'NewChatName', result: chat, type: Types.EMIT });
+    });
+    socket.on('LeftChatUser', chat => {
+        postMessage({ action: 'LeftChatUser', result: chat, type: Types.EMIT });
     });
 
     socket.on('Alarm', alarm => {

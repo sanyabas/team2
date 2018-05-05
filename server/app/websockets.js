@@ -683,6 +683,12 @@ async function leaveChat(uid, chatId) {
     await chat.rename(users.map(user => user.login).join(', '));
     users.find(user => user._id.toString() === uid).deleteChat(chat._id);
 
-    return await getChatForEmit(chat);
+    const chatToEmit = await getChatForEmit(chat);
+
+    if (!chatToEmit.users.length) {
+        await chatToEmit.remove();
+    }
+
+    return chatToEmit;
 
 }

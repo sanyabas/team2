@@ -79,6 +79,18 @@ export class WorkerWrapper {
         this._worker.postMessage({ action: 'GetContactList' });
     }
 
+    joinChat(inviteLink) {
+        this._worker.postMessage({ action: 'JoinChat', value: inviteLink });
+    }
+
+    renameChat({ chatId, name }) {
+        this._worker.postMessage({ action: 'RenameChat', value: { chatId, name } });
+    }
+
+    leaveChat(chatId) {
+        this._worker.postMessage({ action: 'LeaveChat', value: chatId });
+    }
+
     _handleResponse(response) {
         const handlers = this._handlers[response.action];
 
