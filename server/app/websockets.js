@@ -36,6 +36,7 @@ module.exports = async function (app, sessionStore) {
     const wsServer = new WebSocketServer(app, sessionGetter);
     await initAlarms(wsServer);
 
+    // eslint-disable-next-line max-statements
     wsServer.on('authUserConnected', ({ socket, uid }) => {
         if (!executeQueues[uid]) {
             executeQueues[uid] = queue(async ({ action, data }, callback) => {
@@ -245,6 +246,74 @@ module.exports = async function (app, sessionStore) {
             null,
             uid,
             execute.bind(null, socket, uid, GetContactList)));
+
+        socket.on('JoinChat', pushAction.bind(
+            null, uid, async link => {
+                try {
+                    const chat = await joinChat(link, uid);
+                    socket.emit('JoinChatResult', {
+                        success: true,
+                        value: chat
+                    });
+
+                    for (const anotherUser of chat.users
+                        .map(user => user._id)
+                        .filter(userId => userId.toString() !== uid)) {
+                        wsServer.emitByUID(anotherUser, 'NewChatUser', chat);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    socket.emit('JoinChatResult', {
+                        success: false,
+                        error: error.message || error.body
+                    });
+                }
+            }
+        ));
+
+        socket.on('RenameChat', pushAction.bind(null, uid, async ({ chatId, name }) => {
+            try {
+                const chat = await renameChat(chatId, name);
+
+                socket.emit('RenameChatResult', {
+                    success: true,
+                    value: chat
+                });
+
+                for (const userId of chat.users
+                    .map(user => user._id)) {
+                    wsServer.emitByUID(userId, 'NewChatName', chat);
+                }
+            } catch (error) {
+                console.error(error);
+                socket.emit('RenameChatResult', {
+                    success: false,
+                    error: error.message || error.body
+                });
+            }
+        }));
+
+        socket.on('LeaveChat', pushAction.bind(null, uid, async chatId => {
+            try {
+                const chat = await leaveChat(uid, chatId);
+
+                socket.emit('LeaveChatResult', {
+                    success: true,
+                    value: chat
+                });
+
+                for (const userId of chat.users
+                    .map(user => user._id)) {
+                    wsServer.emitByUID(userId, 'LeftChatUser', chat);
+                }
+            } catch (error) {
+                console.error(error);
+                socket.emit('LeaveChatResult', {
+                    success: false,
+                    error: error.message || error.body
+                });
+            }
+        }));
 
         socket.on('disconnect', () => {
             if (wsServer.getUserConnectionsCount(uid) === 0) {
@@ -570,4 +639,50 @@ async function revokeLink(chatId) {
     await chat.generateInviteLink();
 
     return chat;
+}
+
+async function joinChat(link, uid) {
+    const chat = await ChatModel.findOne({ inviteLink: link });
+    if (!chat) {
+        throw new Error('Chat not found');
+    }
+    if (chat.containsUser(uid)) {
+        throw new Error('User already in the chat');
+    }
+    await chat.addUser(uid);
+    const allUserIds = chat.users.concat([uid]);
+    const users = await UserModel.find({ _id: { $in: allUserIds } });
+    await chat.rename(users.map(user => user.login).join(', '));
+    users.find(user => user._id.toString() === uid).addChat(chat._id);
+
+    return await getChatForEmit(chat);
+}
+
+async function renameChat(chatId, name) {
+    const chat = await ChatModel.findById(chatId);
+    if (!chat) {
+        throw new Error('Chat not found');
+    }
+    name = name.trim();
+    if (!name) {
+        throw new Error('Name is empty');
+    }
+    await chat.rename(name);
+
+    return await getChatForEmit(chat);
+}
+
+async function leaveChat(uid, chatId) {
+    const chat = await ChatModel.findById(chatId);
+    if (!chat || !chat.containsUser(uid)) {
+        throw new Error('User doesn\'t belong to the chat');
+    }
+    await chat.deleteUser(uid);
+    const newUsers = chat.users.filter(userId => userId.toString !== uid);
+    const users = await UserModel.find({ _id: { $in: newUsers } });
+    await chat.rename(users.map(user => user.login).join(', '));
+    users.find(user => user._id.toString() === uid).deleteChat(chat._id);
+
+    return await getChatForEmit(chat);
+
 }

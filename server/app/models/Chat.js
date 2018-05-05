@@ -24,4 +24,12 @@ chatSchema.methods.containsUser = function (userName) {
     return this.users.indexOf(mongoose.Types.ObjectId(userName)) !== -1;
 };
 
+chatSchema.methods.rename = function (name) {
+    return this.update({ name }).exec();
+};
+
+chatSchema.methods.deleteUser = function (uid) {
+    return this.update({ $pull: { users: { _id: uid } } }).exec();
+};
+
 module.exports = mongoose.model('Chat', chatSchema);

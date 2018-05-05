@@ -25,4 +25,8 @@ userSchema.methods.addChat = function (chatId) {
     return this.update({ $push: { chats: chatId } }).exec();
 };
 
+userSchema.methods.deleteChat = function (chatId) {
+    return this.update({ $pull: { chats: { _id: chatId } } }).exec();
+};
+
 module.exports = mongoose.model('User', userSchema);
