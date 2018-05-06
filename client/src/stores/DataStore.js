@@ -184,6 +184,11 @@ export default class DataStore {
         this.chatList[listIndex].name = chatName;
     };
 
+    @action joinChat = inviteLink => {
+        this.loadingState = States.ADD_CHAT;
+        this.webWorker.joinChat(inviteLink);
+    };
+
     @action userJoined = (chat) => {
         const index = this.chatList.findIndex(listChat => listChat._id === chat._id);
         this.setChatName(index, chat.name);

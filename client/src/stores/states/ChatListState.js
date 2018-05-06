@@ -31,6 +31,17 @@ export default class ChatListState {
         this.currentChat = this.chatsToDisplay.find(chat => chat.name === name) || {};
     };
 
+    @action joinChat = link => {
+        if (this.dataStore.loadingState !== States.LOADED) {
+            this.state.onLoadQueue.push(this.joinChat.bind(this, link));
+
+            return;
+        }
+
+        this.dataStore.joinChat(link);
+        // this.currentChat = this.chatsToDisplay.find(chat => chat.inviteLink === link);
+    };
+
     @action change = (inputText) => {
         this.searchInput = inputText;
         this.inSearch = true;

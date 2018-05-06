@@ -5,7 +5,8 @@ import director from 'director/build/director';
 export function startRouter(store) {
     const routes = {
         '/im/:p': (name) => store.selectChatByName(name),
-        '/im': () => store.closeChat()
+        '/im': () => store.closeChat(),
+        '/join/:p': (link) => store.joinChat(link)
     };
     const router = director.Router(routes);
 

@@ -108,6 +108,10 @@ export default class UIStore {
             this.chatListState.searchResults = [];
         }
     };
+
+    @action setCurrentChat = chat => {
+        this.chatListState.currentChat = chat;
+    }
 }
 
 function getLoaderState(loadingState) {

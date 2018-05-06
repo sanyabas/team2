@@ -163,4 +163,16 @@ function initWorker(webWorker, dataStore, state) {
         dataStore.userJoined(chat);
     });
 
+    webWorker.subscribe('JoinChat', (error, chat) => {
+        if (error) {
+            console.error('Join error', error);
+        }
+
+        dataStore.setLoadingState(States.LOADED);
+        console.info(chat);
+        dataStore.addChats([chat]);
+        webWorker.getMessages({ chatId: chat._id, limit: 50, offset: 0 });
+        state.setCurrentChat(chat);
+    });
+
 }

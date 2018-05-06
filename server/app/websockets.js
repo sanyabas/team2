@@ -563,7 +563,7 @@ async function getChatForEmit(chat) {
         dialog: chat.dialog,
         avatar: chat.avatar,
         users: newChat.users.map(getProfileFromUser),
-        inviteLink: new URL(`join/${chat.inviteLink}`, config.get('host'))
+        inviteLink: new URL(`#/join/${chat.inviteLink}`, config.get('host'))
     };
 }
 
