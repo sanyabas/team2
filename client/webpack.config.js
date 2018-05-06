@@ -99,15 +99,15 @@ module.exports = {
                         outputPath: 'fonts/',
                         publicPath: `${staticUrl}/fonts`
                     }}]
-                }, {
-                    test: /\.mp3$/,
-                    use: [{
-                        loader: 'file-loader',
-                        options: {
-                            name: '[name].[ext]',
-                            outputPath: 'sounds/'
-                        }
-                    }]
+            }, {
+                test: /\.mp3$/,
+                use: [{
+                    loader: 'file-loader',
+                    options: {
+                        name: '[name].[ext]',
+                        outputPath: 'sounds/'
+                    }
+                }]
             }
         ]
     },
