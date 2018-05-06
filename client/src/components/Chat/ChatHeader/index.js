@@ -111,10 +111,10 @@ export default class ChatHeader extends Component {
                                     </button>
                                 </CopyToClipboard>
                             </div>
-                            <button className={`${styles.Button} ${styles.LeaveButton}`}
-                                onClick={this.leaveHandler.bind(this)}>
-                                Leave chat
-                            </button>
+                            {/* <button className={`${styles.Button} ${styles.LeaveButton}`}*/}
+                            {/* onClick={this.leaveHandler.bind(this)}>*/}
+                            {/* Leave chat*/}
+                            {/* </button>*/}
                         </Fragment>
                         }
                     </div>
