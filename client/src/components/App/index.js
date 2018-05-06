@@ -72,7 +72,8 @@ export default class App extends Component {
                     {chatListState.currentChat.name
                         ? <Chat name={chatListState.currentChat.name}
                             avatar={chatListState.currentChat.avatar}
-                            inviteLink={chatListState.currentChat.inviteLink}>
+                            inviteLink={chatListState.currentChat.inviteLink}
+                            dialog={chatListState.currentChat.dialog}>
                         </Chat>
                         : <div className={styles.StubWrapper}
                             onClick={state.closeProfile.bind(state)}>

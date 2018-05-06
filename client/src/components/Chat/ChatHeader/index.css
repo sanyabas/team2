@@ -32,9 +32,9 @@
 .PopupContainer {
     padding: 20px;
     width: 380px;
-    height: 160px;
+    height: 180px;
     display: grid;
-    grid-template-areas: "u u c" "a n n" "a s s" "lh lv lv";
+    grid-template-areas: "u u c" "a n n" "a s s" "lh lv lv" "leave leave leave";
     grid-template-rows: 60px 35px 35px;
     grid-template-columns: 90px 270px 20px;
 }
@@ -64,28 +64,33 @@
     align-self: end;
 }
 
+.PopupName:hover{
+    cursor: pointer;
+    opacity: .7;
+}
+
 .PopupStatus {
     color: #aaa;
     grid-area: s;
 }
 
-.PopupLinkHeader{
+.PopupLinkHeader {
     grid-area: lh;
     font-size: 16px;
     margin-top: 7px;
-    text-align: right;
+    text-align: left;
 }
 
-.PopupLinkValue{
+.PopupLinkValue {
     grid-area: lv;
     display: flex;
 }
 
-.PopupLinkInput{
+.PopupLinkInput {
     overflow: hidden;
     height: 24px;
     margin: 0 0 16px;
-    padding: 6px 16px;
+    padding: 6px 6px;
 
     width: 90%;
 
@@ -98,7 +103,7 @@
     box-sizing: border-box;
 }
 
-.PopupCopyButton {
+.Button {
     display: flex;
 
     margin: auto 16px 16px 0;
@@ -112,7 +117,30 @@
     border: 0;
 }
 
-.PopupCopyButton:active
-{
+.Button:active {
     color: #03a9f4;
+}
+
+.LeaveButton {
+    color: #e00;
+    font-size: 14px;
+}
+
+.LeaveButton:active {
+    color: #a00205;
+}
+
+.Hidden {
+    display: none;
+}
+
+.NameEditor {
+    grid-area: n;
+    display: none;
+    /*display: flex;*/
+    width: 100%;
+}
+
+.NameInput {
+    width: 90%;
 }
