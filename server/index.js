@@ -11,7 +11,6 @@ const morgan = require('morgan');
 const path = require('path');
 const cors = require('cors');
 const { createServer } = require('http');
-const cookieParser = require('cookie-parser');
 
 const { setSerializers, strategy } = require('./app/tools/auth');
 const routes = require('./app/routes');
@@ -72,7 +71,6 @@ app.set('views', viewsDir);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(cookieParser());
 
 routes(app);
 
