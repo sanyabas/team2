@@ -44,13 +44,10 @@ export default class ChatListState {
     @action joinChat = link => {
         if (this.dataStore.loadingState !== States.LOADED) {
             this.state.onLoadQueue.push(this.joinChat.bind(this, link));
-            console.info('Join queued');
 
             return;
         }
-        console.info('Joining');
         this.dataStore.joinChat(link);
-        // this.currentChat = this.chatsToDisplay.find(chat => chat.inviteLink === link);
     };
 
     @action change = (inputText) => {

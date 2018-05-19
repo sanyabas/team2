@@ -32,7 +32,6 @@ export default class UIStore {
 
         autorun(() => {
             if (dataStore.loadingState === States.LOADED && this.onLoadQueue.length) {
-                console.info(this.onLoadQueue.length);
                 this.onLoadQueue.pop()();
             }
         });

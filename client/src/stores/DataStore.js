@@ -185,7 +185,6 @@ export default class DataStore {
     };
 
     @action joinChat = inviteLink => {
-        console.info(inviteLink);
         this.loadingState = States.ADD_CHAT;
         this.webWorker.joinChat(inviteLink);
     };
@@ -274,7 +273,6 @@ function initChat(chat) {
     const user = chat.users.find(entry => entry._id !== this.profile._id);
 
     if (!user) {
-        console.info('empty chat');
         chat.name = 'Empty';
         chat.avatar = chat.users[0].avatar;
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /* eslint-disable max-statements */
 import DataStore from './DataStore';
 import UIStore from './UIStore';
@@ -15,7 +14,7 @@ export default class RootStore {
 function initWorker(webWorker, dataStore, state) {
     webWorker.subscribe('SearchByLogin', (error, result) => {
         if (error) {
-            console.info(error);
+            console.error(error);
 
             return;
         }
@@ -26,12 +25,12 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('DeleteProfile', (error) => {
         if (error) {
-            console.info(error);
+            console.error(error);
         }
     });
 
     webWorker.subscribe('SendReaction', (err) => {
-        console.info(err);
+        console.error(err);
     });
 
     webWorker.subscribe('NewReaction', (error, result) => {
@@ -40,7 +39,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('SendMessage', (error, result) => {
         if (error) {
-            console.info(error);
+            console.error(error);
 
             return;
         }
@@ -50,7 +49,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('GetProfile', (error, profile) => {
         if (error) {
-            console.info(error);
+            console.error(error);
 
             return;
         }
@@ -61,20 +60,19 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('UploadImage', (error, result) => {
         if (error) {
-            console.info(error);
+            console.error(error);
         }
 
         state.addAttachment(result);
     });
 
     webWorker.subscribe('Alarm', (error, alarm) => {
-        console.log(alarm);
         state.alarmState.alarm(alarm.message);
     });
 
     webWorker.subscribe('UploadAvatar', (error, result) => {
         if (error) {
-            console.info(error);
+            console.error(error);
         }
 
         dataStore.setAvatar(result);
@@ -82,7 +80,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('NewMessage', (error, result) => {
         if (error) {
-            console.info(error);
+            console.error(error);
 
             return;
         }
@@ -92,7 +90,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('GetChatList', (error, chats) => {
         if (error) {
-            console.info('error: ', error);
+            console.error('error: ', error);
 
             return;
         }
@@ -111,7 +109,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('GetMessages', (error, data) => {
         if (!data || error) {
-            console.info('error: ', error);
+            console.error('error: ', error);
 
             return;
         }
@@ -121,7 +119,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('AddContact', (error, chat) => {
         if (error) {
-            console.info('error: ', error);
+            console.error('error: ', error);
 
             return;
         }
@@ -132,7 +130,7 @@ function initWorker(webWorker, dataStore, state) {
 
     webWorker.subscribe('NewChat', (error, chat) => {
         if (error) {
-            console.info('error: ', error);
+            console.error('error: ', error);
 
             return;
         }
@@ -144,14 +142,18 @@ function initWorker(webWorker, dataStore, state) {
     webWorker.subscribe('CreateChat', (error, chat) => {
         if (error) {
             console.error(`CreateChat error: ${error}`);
+
+            return;
         }
 
-        console.info(`CreateChat: ${chat}`);
+        state.setCurrentChat(chat);
     });
 
     webWorker.subscribe('GetContactList', (error, contacts) => {
         if (error) {
             console.error(`GetContactList error: ${error}`);
+
+            return;
         }
 
         dataStore.setLoadingState(States.LOADED);
@@ -161,17 +163,19 @@ function initWorker(webWorker, dataStore, state) {
     webWorker.subscribe('NewChatUser', (error, chat) => {
         if (error) {
             console.error(`New chat user error: ${error}`);
+
+            return;
         }
-        console.info('New chat user');
         dataStore.userJoined(chat);
     });
 
     webWorker.subscribe('JoinChat', (error, chat) => {
         if (error) {
             console.error('Join error', error);
+
+            return;
         }
         dataStore.setLoadingState(States.LOADED);
-        console.info(chat);
         dataStore.addChats([chat]);
         webWorker.getMessages({ chatId: chat._id, limit: 50, offset: 0 });
         state.setCurrentChat(chat);

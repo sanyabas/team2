@@ -19,7 +19,6 @@ export default class ChatCreateState {
         } else {
             this.selectedContacts.push(contact);
         }
-        console.info(this.selectedContacts);
     };
 
     @action createChat = () => {

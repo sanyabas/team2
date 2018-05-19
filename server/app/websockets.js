@@ -203,14 +203,14 @@ module.exports = async function (app, sessionStore) {
                 const allUserIds = userIds.concat([uid]);
                 const result = await createChat(allUserIds);
 
+                for (const userId of allUserIds) {
+                    wsServer.emitByUID(userId, 'NewChat', result);
+                }
+
                 socket.emit('CreateChatResult', {
                     success: true,
                     value: result
                 });
-
-                for (const userId of allUserIds) {
-                    wsServer.emitByUID(userId, 'NewChat', result);
-                }
             } catch (error) {
                 console.error(error);
                 socket.emit('CreateChatResult', {
@@ -363,7 +363,6 @@ function pushAction(uid, action, data) {
 async function execute(socket, uid, fn, data) {
     try {
         const result = await fn(uid, data);
-        console.info(`Emitting ${fn.name}`);
         socket.emit(fn.name + 'Result', {
             success: true,
             value: result
@@ -564,7 +563,7 @@ async function getChatForEmit(chat) {
         dialog: chat.dialog,
         avatar: chat.avatar,
         users: newChat.users.map(getProfileFromUser),
-        inviteLink: new URL(`#/join/${chat.inviteLink}`, config.get('host'))
+        inviteLink: new URL(`?join=${chat.inviteLink}`, config.get('host'))
     };
 }
 
@@ -653,7 +652,8 @@ async function joinChat(link, uid) {
     await chat.addUser(uid);
     const allUserIds = chat.users.concat([uid]);
     const users = await UserModel.find({ _id: { $in: allUserIds } });
-    await chat.rename(users.map(user => user.login).join(', '));
+    chat.name = users.map(user => user.login).join(', ');
+    await chat.save();
     users.find(user => user._id.toString() === uid).addChat(chat._id);
 
     return await getChatForEmit(chat);

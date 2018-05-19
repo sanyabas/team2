@@ -21,14 +21,12 @@ function init() {
         postMessage({ action: 'NewMessage', result: message, type: Types.EMIT });
     });
     socket.on('NewChat', chat => {
-        console.info(`Received newChat: ${chat}`);
         postMessage({ action: 'NewChat', result: chat, type: Types.EMIT });
     });
     socket.on('NewInviteLink', chat => {
         postMessage({ action: 'NewInviteLink', result: chat, type: Types.EMIT });
     });
     socket.on('NewChatUser', chat => {
-        console.info('[w] Received NewChatUser: ', chat);
         postMessage({ action: 'NewChatUser', result: chat, type: Types.EMIT });
     });
 
@@ -48,7 +46,6 @@ function init() {
 
     for (const method of METHODS) {
         socket.on(`${method}Result`, result => {
-            console.info(`Received ${method}: ${result}`);
             postMessage({ action: method, result, type: Types.RESPONSE });
         });
     }
