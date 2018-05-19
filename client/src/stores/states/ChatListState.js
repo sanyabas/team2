@@ -22,15 +22,6 @@ export default class ChatListState {
         this.currentChat = {};
     };
 
-    @action selectChatByName = (name) => {
-        if (this.dataStore.loadingState !== States.LOADED) {
-            this.state.onLoadQueue.push(this.selectChatByName.bind(this, name));
-
-            return;
-        }
-        this.currentChat = this.chatsToDisplay.find(chat => chat.name === name) || {};
-    };
-
     @action selectChatById = id => {
         if (this.dataStore.loadingState !== States.LOADED) {
             this.state.onLoadQueue.push(this.selectChatById.bind(this, id));
