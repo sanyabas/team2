@@ -9,11 +9,20 @@ module.exports = app => {
     app.get(
         '/',
         (req, res) => {
-            console.log(req.session);
+            if (req.query.join) {
+                const fullUrl = new URL(`#/join/${req.query.join}`, config.get('clientHost'));
+                if (req.isAuthenticated()) {
+                    res.redirect(fullUrl);
+                } else {
+                    req.session.join = fullUrl;
+                    res.redirect(`${config.get('host')}/login`);
+                }
+
+                return;
+            }
             if (req.isAuthenticated()) {
                 res.render('app', { staticPath: config.get('staticPath') });
             } else {
-                res.cookie('join', req.query.join);
                 res.redirect(`${config.get('host')}/login`);
             }
         }
@@ -34,16 +43,12 @@ module.exports = app => {
         // Если не удачно, то отправляем на /
         passport.authenticate('github', { failureRedirect: '/error' }),
         (req, res) => {
-            console.log(req.cookies);
-            const invite = req.cookies.join;
+            const invite = req.session.join;
             if (!invite) {
                 res.redirect(config.get('clientHost'));
-
-                return;
+            } else {
+                res.redirect(req.session.join);
             }
-            const fullUrl = new URL(`#/join/${invite}`, config.get('clientHost'));
-            res.clearCookie('join');
-            res.redirect(fullUrl);
         }
     );
 
