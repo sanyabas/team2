@@ -99,7 +99,11 @@ export class WorkerWrapper {
         }
 
         if (response.type === Types.RESPONSE) {
-            handlers.forEach(handler => handler(null, response.result.value));
+            if (response.result.success) {
+                handlers.forEach(handler => handler(null, response.result.value));
+            } else {
+                handlers.forEach(handler => handler(response.result.error, null));
+            }
 
             return;
         }

@@ -31,8 +31,9 @@ export default class UIStore {
             new MessageNotificationState(this.dataStore, this.chatListState);
 
         autorun(() => {
-            if (dataStore.loadingState === States.LOADED) {
-                this.onLoadQueue.forEach(fc => fc());
+            if (dataStore.loadingState === States.LOADED && this.onLoadQueue.length) {
+                console.info(this.onLoadQueue.length);
+                this.onLoadQueue.pop()();
             }
         });
 

@@ -170,7 +170,6 @@ function initWorker(webWorker, dataStore, state) {
         if (error) {
             console.error('Join error', error);
         }
-
         dataStore.setLoadingState(States.LOADED);
         console.info(chat);
         dataStore.addChats([chat]);

@@ -185,6 +185,7 @@ export default class DataStore {
     };
 
     @action joinChat = inviteLink => {
+        console.info(inviteLink);
         this.loadingState = States.ADD_CHAT;
         this.webWorker.joinChat(inviteLink);
     };
