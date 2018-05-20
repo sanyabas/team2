@@ -30,6 +30,10 @@ export default class ChatCreateState {
         this.selectedContacts.clear();
     };
 
+    @action clearSelected = () => {
+        this.selectedContacts.clear();
+    };
+
     @computed
     get contactsForChat() {
         return this.selectedContacts;

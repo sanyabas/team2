@@ -81,7 +81,7 @@ export default class MessageNotificationState {
         let image;
         if (messageForNotification.attachments &&
             messageForNotification.attachments.length) {
-            image = messageForNotification.lastMessage.attachments[0];
+            image = messageForNotification.attachments[0];
         }
 
         return image;

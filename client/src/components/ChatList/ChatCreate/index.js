@@ -27,6 +27,7 @@ export default class ChatCreate extends Component {
     }
 
     cancelButtonClickHandler() {
+        this.props.chatCreateState.clearSelected();
         this.props.chatListState.toggleCreating();
     }
 

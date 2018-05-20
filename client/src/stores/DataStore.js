@@ -53,11 +53,13 @@ export default class DataStore {
     };
 
     @action sortChats() {
-        this.chatList = this.chatList.sort((first, second) => {
+        this.chatList = this.chatList
+            .slice(0, 1)
+            .concat(this.chatList.slice(1).sort((first, second) => {
 
-            return Date.parse(second.createdAt) -
-                Date.parse(first.createdAt);
-        });
+                return Date.parse(second.createdAt) -
+                    Date.parse(first.createdAt);
+            }));
     }
 
     @action addReaction = (result) => {

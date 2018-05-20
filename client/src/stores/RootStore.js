@@ -30,7 +30,9 @@ function initWorker(webWorker, dataStore, state) {
     });
 
     webWorker.subscribe('SendReaction', (err) => {
-        console.error(err);
+        if (err) {
+            console.error(err);
+        }
     });
 
     webWorker.subscribe('NewReaction', (error, result) => {
@@ -64,6 +66,12 @@ function initWorker(webWorker, dataStore, state) {
         }
 
         state.addAttachment(result);
+    });
+
+    webWorker.subscribe('SetAlarm', error => {
+        if (error) {
+            console.error(error);
+        }
     });
 
     webWorker.subscribe('Alarm', (error, alarm) => {
