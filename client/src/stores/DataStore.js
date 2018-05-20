@@ -49,7 +49,16 @@ export default class DataStore {
                 this.chatHistories.set(chat._id, { messages: [], totalCount: 0 });
             }
         });
+        this.sortChats();
     };
+
+    @action sortChats() {
+        this.chatList = this.chatList.sort((first, second) => {
+
+            return Date.parse(second.createdAt) -
+                Date.parse(first.createdAt);
+        });
+    }
 
     @action addReaction = (result) => {
         const index = this.chatHistories
